@@ -216,3 +216,12 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Model files
+model
+
+# Database
+db
+
+# Project files
+project_files
