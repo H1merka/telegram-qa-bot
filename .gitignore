@@ -225,3 +225,6 @@ db
 
 # Project files
 project_files
+
+# Logging
+logs
