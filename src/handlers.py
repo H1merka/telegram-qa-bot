@@ -2,9 +2,14 @@ from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, ConversationHandler
 from src.settings import (
     START_STR, HELP_STR, CANCEL_STR, 
-    ADD_DATA_STR, ADDING_DATA
+    ADD_DATA_STR, ADDING_DATA,
+    HANDLERS_LOG_PATH
 )
+from src.logger import AppLogger
 from io import BytesIO
+
+
+logger = AppLogger(__name__, HANDLERS_LOG_PATH)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -16,6 +21,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "виде документов форматов txt, pdf, doc/docx, а также в виде текста.",
         reply_markup=markup
     )
+    logger.debug("Start handler")
 
 
 async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -31,6 +37,7 @@ async def help(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "и ответов на вопросы",
         reply_markup=markup
     )
+    logger.debug("Help handler")
 
 
 async def add_data_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -40,6 +47,7 @@ async def add_data_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Пожалуйста, отправьте текст",
         reply_markup=markup
     )
+    logger.debug("Add data handler")
     return ADDING_DATA
 
 
@@ -61,6 +69,7 @@ async def add_data(update: Update, context: ContextTypes.DEFAULT_TYPE, chain):
         "Данные добавлены в базу",
         reply_markup=markup
     )
+    logger.debug("Add data")
 
     return ConversationHandler.END
 
@@ -72,6 +81,7 @@ async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Добавление данных в базу успешно отменено",
         reply_markup=markup
     )
+    logger.debug("Cancel handler")
     return ConversationHandler.END
 
 
@@ -83,9 +93,14 @@ async def question_answer(update: Update, context: ContextTypes.DEFAULT_TYPE, ch
 
     await update.message.reply_text(reply, reply_markup=markup)
 
+    logger.debug("Answering handler")
+
 
 async def fallback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[START_STR, HELP_STR, ADD_DATA_STR]]
     markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
 
     await update.message.reply_text("Произошла ошибка", reply_markup=markup)
+
+    logger.debug("Fallback handler")
+    

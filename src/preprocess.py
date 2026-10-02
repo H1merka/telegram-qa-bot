@@ -3,6 +3,11 @@ from docx import Document as Doc
 from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from src.utils import clean_extracted_text
+from src.settings import PREPROCESS_LOG_PATH
+from src.logger import AppLogger
+
+
+logger = AppLogger(__name__, PREPROCESS_LOG_PATH)
 
 class Preprocessor:
     def __init__(
@@ -19,6 +24,7 @@ class Preprocessor:
         self.chunk_overlap = chunk_overlap
         self.length_func = length_func
         self.separators = separators
+        self.logger = logger
 
     @property
     def get_file_name(self):
@@ -39,6 +45,7 @@ class Preprocessor:
             separators=self.separators
         )
         self.content = text_splitter.split_text(self.content)
+        self.logger.debug("Text splitted")
 
     def _document_make(self):
         documents = []
@@ -53,6 +60,7 @@ class Preprocessor:
             )
             documents.append(doc)
         self.content = documents
+        self.logger.debug("Documents made")
 
     def _pdf_preprocess(self):
         pdf_reader = PdfReader(self.content)
@@ -66,12 +74,14 @@ class Preprocessor:
         self.content = clean_extracted_text(self.content)
         self._text_split()
         self._document_make()
+        self.logger.debug("PDF processed")
 
     def _txt_preprocess(self):
         self.content = self.content.read().decode('utf-8')
         self.content = clean_extracted_text(self.content)
         self._text_split()
         self._document_make()    
+        self.logger.debug("TXT processed")
 
     def _docx_preprocess(self):
         doc = Doc(self.content)
@@ -80,15 +90,18 @@ class Preprocessor:
         self.content = clean_extracted_text(self.content)
         self._text_split()
         self._document_make()
+        self.logger.debug("DOCX processed")
 
     def _plain_preprocess(self):
         self.content = clean_extracted_text(self.content)
         self._text_split()
-        self._document_make()    
+        self._document_make() 
+        self.logger.debug("Plain text processed")   
 
     def preprocess(self, file_name, content):
         self.file_name = file_name
         self.content = content
+        self.logger.debug("Start preprocessing")
         if self.file_name:
             if self.file_name.endswith(".pdf"):
                 self._pdf_preprocess()

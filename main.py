@@ -7,7 +7,7 @@ from src.settings import (
     MODEL_TASK, MAX_NEW_TOKENS, TEMPERATURE,
     TOP_P, REPETITION_PENALTY, QUANTIZATION_CONFIG,
     ADD_DATA_BUTTON, START_BUTTON, HELP_BUTTON, CANCEL_BUTTON,
-    ADDING_DATA
+    ADDING_DATA, MAIN_LOG_PATH
 )
 from src.chain import Chain
 from src.preprocess import Preprocessor
@@ -18,16 +18,22 @@ from src.handlers import (
     add_data, cancel, question_answer,
     fallback
 )
+from src.logger import AppLogger
 from telegram.ext import (
     Application, ConversationHandler,
     MessageHandler, filters
 )
 
 
+logger = AppLogger(__name__, MAIN_LOG_PATH)
+
+
 def main():
     application = Application.builder().token(TELEGRAM_BOT_KEY).build()
+    logger.debug("Application instantiate")
     
     preprocessor = Preprocessor(CHUNK_SIZE, CHUNK_OVERLAP)
+    logger.debug("Preprocessor instantiate")
     embedding_model = EmbeddingModel(
         EMBEDDING_MODEL_NAME,
         EMBEDDING_MODEL_PATH,
@@ -35,9 +41,11 @@ def main():
         EMBEDDING_BATCH_SIZE,
         HF_TOKEN
     ).embedding_instance()
+    logger.debug("Embeddings instantiate")
     
     vector_store = VecStore(embedding_model, DB_PATH)
     vector_store.make_store()
+    logger.debug("Store instantiate")
     
     chat_model = ChatModel(
         CHAT_MODEL_NAME,
@@ -52,8 +60,10 @@ def main():
         REPETITION_PENALTY,
         QUANTIZATION_CONFIG
     ).chat_instance()
+    logger.debug("Chat instantiate")
     
     chain = Chain(preprocessor, vector_store, chat_model)
+    logger.debug("Chain instantiate")
 
     application.add_handler(MessageHandler(filters.Text(START_BUTTON), start))
     application.add_handler(MessageHandler(filters.Text(HELP_BUTTON), help))
@@ -76,7 +86,9 @@ def main():
             partial(question_answer, chain=chain)
         )
     )
+    logger.debug("Handlers added")
 
+    logger.debug("Start polling")
     application.run_polling()
 
 

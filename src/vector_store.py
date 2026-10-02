@@ -1,7 +1,11 @@
 from langchain_community.vectorstores import FAISS
-from src.settings import DIM
+from src.settings import DIM, STORE_LOG_PATH
 import faiss
 from langchain_community.docstore.in_memory import InMemoryDocstore
+from src.logger import AppLogger
+
+
+logger = AppLogger(__name__, STORE_LOG_PATH)
 
 
 class VecStore:
@@ -9,8 +13,11 @@ class VecStore:
         self.model = model
         self.path = path
         self.store = None
+        self.logger = logger
+        self.logger.debug("Store object inintialized")
 
     def make_store(self):
+        self.logger.debug("Start store making")
         try:
             self.store = FAISS.load_local(
                 self.path, 
@@ -26,12 +33,18 @@ class VecStore:
                 index_to_docstore_id={}
             )
             self.store.save_local(self.path)
+        self.logger.debug("Store made")
 
     def load_data(self, data):
+        self.logger.debug("Start adding data")
         self.store.add_documents(data)
         self.store.save_local(self.path)
+        self.logger.debug("Data added")
 
     def make_retriever(self, top_k=4):
-        return self.store.as_retriever(
+        self.logger.debug("Start retriever making")
+        retriever = self.store.as_retriever(
             search_kwargs={"k": top_k}
         )
+        self.logger.debug("Retriever made")
+        return retriever

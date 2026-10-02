@@ -3,6 +3,11 @@ from langchain_huggingface import (
     HuggingFaceEmbeddings,
     ChatHuggingFace
 )
+from src.settings import MODELS_LOG_PATH
+from src.logger import AppLogger
+
+
+logger = AppLogger(__name__, MODELS_LOG_PATH)
 
 
 class Model:
@@ -34,8 +39,10 @@ class ChatModel(Model):
         self.top_p = top_p
         self.repetiton_penalty = repetition_penalty
         self.quant_config = quant_config
+        self.logger = logger
 
     def chat_instance(self):
+        self.logger.debug("Start llm creating")
         llm = HuggingFacePipeline.from_model_id(
             model_id=self.name,
             task=self.task,
@@ -55,8 +62,13 @@ class ChatModel(Model):
                 "token": self.token,
             }
         )
+        self.logger.debug("LLM created")
+        
+        self.logger.debug("Start chat model creating")
+        chat = ChatHuggingFace(llm=llm)
+        self.logger.debug("Chat model created")
 
-        return ChatHuggingFace(llm=llm)
+        return chat
 
 
 class EmbeddingModel(Model):
@@ -70,8 +82,10 @@ class EmbeddingModel(Model):
             device, batch_size, 
             token
         )
+        self.logger = logger
     
     def embedding_instance(self):
+        self.logger.debug("Start embedding model creation")
         embeddings_model = HuggingFaceEmbeddings(
             model_name=self.name,
             cache_folder=self.path,
@@ -85,5 +99,6 @@ class EmbeddingModel(Model):
             },
             show_progress=True
         )
+        self.logger.debug("Embedding model created")
 
         return embeddings_model

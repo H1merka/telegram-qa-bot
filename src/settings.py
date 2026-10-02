@@ -54,7 +54,11 @@ LOG_LEVEL = logging.DEBUG
 EMBEDDING_MODEL_PATH = "./model/embeddings"
 CHAT_MODEL_PATH = "./model/chat"
 DB_PATH = "./db"
-LOG_PATH = "./logs"
+MAIN_LOG_PATH = "./logs/main.log"
+HANDLERS_LOG_PATH = "./logs/handlers.log"
+MODELS_LOG_PATH = "./logs/models.log"
+PREPROCESS_LOG_PATH = "./logs/preprocess.log"
+STORE_LOG_PATH = "./logs/store.log"
 
 SYSTEM_PROMPT = """
 Ты — полезный ИИ-помощник, отвечающий на вопросы на основе предоставленного контекста.
