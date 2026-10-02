@@ -1,0 +1,19 @@
+# Cache and env
+.mypy_cache
+.venv
+**/__pycache__
+
+# Project data
+db
+logs
+model
+project_files
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Git
+.git
+.gitignore

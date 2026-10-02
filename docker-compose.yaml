@@ -1,0 +1,17 @@
+services:
+  qa-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qa-bot
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./models:/models
+      - db:/db
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    restart: unless-stopped
+
+volumes:
+  db:
